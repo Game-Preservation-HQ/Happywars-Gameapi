@@ -27,6 +27,8 @@ At start-up the game makes three calls, in this order:
 | `CreateSaveData` | Only when there is none: makes a new save. |
 | `CoreSaveDataLoad` | Downloads the save. |
 
+The other calls the game makes, and the shape of each reply, are in [API.md](API.md).
+
 Each call is a POST whose body is one line of `name:value` pairs. `f` names the call and `pid` is the player's Steam ID:
 
 ```

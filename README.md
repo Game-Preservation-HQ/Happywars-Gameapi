@@ -73,6 +73,10 @@ The service prefix the patch added (`/gameapi`, `/telemetry`, `/purchasing`, `/s
 - [docs/save-example.json](docs/save-example.json) is a whole sample save in the form the game reads.
 - [docs/save-example.txt](docs/save-example.txt) is the same save packed the way `CoreSaveDataLoad` sends it, for trying the unpacking code in the doc.
 
+## Game API
+
+[docs/API.md](docs/API.md) covers every other call the game and its launcher make: the account calls, TitleLogin, the daily login bonus, DLC, character and item calls, the Happy Spinner and Happy Card draws, the Happy Ticket shop (HappyTicketAsset, HappyTicketSum, InitTxn, FinalizeTxn), matchmaking, the map vote, GameResult and missions. For each one it gives the request keys, the reply wrapper (the `JsonRadarResult*` and `RadarJsonResult*` names) with every field, and an example.
+
 ## Tests
 
 ```
