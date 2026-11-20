@@ -66,6 +66,13 @@ The service prefix the patch added (`/gameapi`, `/telemetry`, `/purchasing`, `/s
 - A gameapi without a `TelemetryEntity` handler answers telemetry with `404`. `--local-telemetry` answers those requests locally with an empty `200` instead, the way the old capture server did.
 - The log has the player's Steam id in it. Don't post it as is.
 
+## Save data
+
+[docs/SAVE-SYSTEM.md](docs/SAVE-SYSTEM.md) explains the save data the game loads at start-up (`JsonSaveData`): how the answer is packed, every member, the bit sets, character looks, items, the battle record and the options, with examples.
+
+- [docs/save-example.json](docs/save-example.json) is a whole sample save in the form the game reads.
+- [docs/save-example.txt](docs/save-example.txt) is the same save packed the way `CoreSaveDataLoad` sends it, for trying the unpacking code in the doc.
+
 ## Tests
 
 ```
