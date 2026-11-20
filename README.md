@@ -1,10 +1,15 @@
-# HappyWarsGameapiPatch
+# Happywars-Gameapi
 
-A small script that points the Happy Wars PC client at the Happy Wars Revival gameapi server for everything: save data, game results, Happy Tickets, purchases, telemetry and sts.
+Two small scripts that point the Happy Wars PC client at the Happy Wars Revival gameapi server for everything: save data, game results, Happy Tickets, purchases, telemetry and sts.
 
-The client has the old Microsoft server addresses (`*.happywarspc.msgamestudios.com`) built in, and those servers are gone. This script rewrites every copy of those addresses in `HappyWars.exe` and writes a patched copy. I made it for the Steam Early Access build (the one that sends `version:Cores_EarlyAccess`).
+The client has the old Microsoft server addresses (`*.happywarspc.msgamestudios.com`) built in, and those servers are gone. There are two ways to send the client to gameapi:
 
-## Usage
+- `patch.py` rewrites every copy of those addresses in `HappyWars.exe` and writes a patched copy, so the client talks to gameapi directly.
+- `HappyWars.py` is a small local server. A client patched to `http://localhost:12345` (the way the original gist's patch did it) sends its requests there. The server forwards each one to gameapi and sends gameapi's reply back, and it prints every request and reply.
+
+I made them for the Steam Early Access build (the one that sends `version:Cores_EarlyAccess`).
+
+## Patching the exe (patch.py)
 
 You need Python 3. No extra packages. Put `patch.py` next to `HappyWars.exe` and run:
 
@@ -39,23 +44,46 @@ The client adds its own paths to these addresses (`/pollux/`, `/TelemetryEntity/
 - Telemetry and sts requests go to gameapi too.
 - `--old-domain` lets you patch a build that uses a different old domain.
 
+## Local server (HappyWars.py)
+
+```
+py HappyWars.py
+```
+
+That listens on `localhost:12345` (both `127.0.0.1` and `::1`) and forwards to `https://gameapi.hwapi.live/api`. Other options: `--server http://127.0.0.1:8099/api` for your own gameapi, `--port`, `--host`, `--log capture.txt` to also write the log to a file, `--log-bytes 0` to show whole bodies.
+
+| The client asks for | Goes to |
+|---|---|
+| `/gameapi/pollux/` or `/pollux/` | `https://gameapi.hwapi.live/api/pollux/` |
+| `/purchasing/HappyTicketSum` or `/HappyTicketSum` | `https://gameapi.hwapi.live/api/HappyTicketSum` |
+| `/telemetry/TelemetryEntity/?name=...` | `https://gameapi.hwapi.live/api/TelemetryEntity/?name=...` |
+| `/api/...` | `https://gameapi.hwapi.live/api/...` |
+
+The service prefix the patch added (`/gameapi`, `/telemetry`, `/purchasing`, `/sts`) and the server's own `/api` are dropped, and the rest goes under the server's address. So a client patched with `py patch.py --server http://localhost:12345/api` works with it too.
+
+- The request body and the client's headers go to gameapi unchanged. gameapi's status, headers and body come back unchanged, and redirects are passed back rather than followed.
+- If gameapi can't be reached, the client gets an empty `502`.
+- A gameapi without a `TelemetryEntity` handler answers telemetry with `404`. `--local-telemetry` answers those requests locally with an empty `200` instead, the way the old capture server did.
+- The log has the player's Steam id in it. Don't post it as is.
+
 ## Tests
 
 ```
 py tests/test_patch.py
+py tests/test_server.py
 ```
 
-This builds a small fake exe with the same string layout, patches it and checks every string.
+`test_patch.py` builds a small fake exe with the same string layout, patches it and checks every string. `test_server.py` runs `HappyWars.py` in front of a fake gameapi and checks where each request goes and what comes back.
 
 ## Credits
 
-Based on [kprotty's patch script](https://gist.github.com/kprotty/f09aa4b84e4f283575e697f22d07171a), which pointed the first copy of each address at a local server.
+Based on [kprotty's gist](https://gist.github.com/kprotty/f09aa4b84e4f283575e697f22d07171a). Its `patch.py` pointed the first copy of each address at a local server, and its `HappyWars.py` was a log of what that server received.
 
 ## License
 
 Copyright (C) 2026 Serenity, Game Preservation HQ.
 
-HappyWarsGameapiPatch is free software under the [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0-only). You may use, change and share it, on these conditions:
+Happywars-Gameapi is free software under the [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0-only). You may use, change and share it, on these conditions:
 
 - **Credit:** every copy, and every changed version, must keep the copyright notice above and the credit to Serenity, together with the license.
 - **Share the code:** if you give anyone a copy, or a changed version, you must also give them its full source code under this same license. This also applies when you run a changed version on a website or server that other people use: you must offer those people the source of your version.
